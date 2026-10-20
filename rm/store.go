@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"math"
 	"os"
+	"path/filepath"
 	"sort"
 	"sync"
 	"time"
@@ -248,17 +249,29 @@ type snapshot struct {
 
 func (s *Store) Save(path string) error {
 	s.mu.RLock()
-	defer s.mu.RUnlock()
 	snap := snapshot{NextID: s.nextID}
 	for _, m := range s.mem {
 		snap.Memories = append(snap.Memories, memDisk{*m, m.Vec})
 	}
+	s.mu.RUnlock()
 	b, err := json.Marshal(snap)
 	if err != nil {
 		return err
 	}
-	tmp := path + ".tmp"
-	if err := os.WriteFile(tmp, b, 0644); err != nil {
+	// unique temp name per caller: concurrent Save()s must not interleave
+	// writes to one fixed .tmp path
+	f, err := os.CreateTemp(filepath.Dir(path), "memories-*.tmp")
+	if err != nil {
+		return err
+	}
+	tmp := f.Name()
+	if _, err := f.Write(b); err != nil {
+		f.Close()
+		os.Remove(tmp)
+		return err
+	}
+	if err := f.Close(); err != nil {
+		os.Remove(tmp)
 		return err
 	}
 	return os.Rename(tmp, path) // atomic

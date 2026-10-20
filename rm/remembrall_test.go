@@ -1,9 +1,11 @@
 package rm
 
 import (
+	"fmt"
 	"math"
 	"math/rand"
 	"path/filepath"
+	"sync"
 	"testing"
 	"time"
 )
@@ -223,4 +225,53 @@ func itoa(i int) string {
 		b[p] = '-'
 	}
 	return string(b[p:])
+}
+
+func TestStoreConcurrentAccess(t *testing.T) {
+	s := NewStore()
+	var wg sync.WaitGroup
+	for g := 0; g < 8; g++ {
+		wg.Add(1)
+		go func(g int) {
+			defer wg.Done()
+			for i := 0; i < 200; i++ {
+				m := s.Remember(fmt.Sprintf("g%d item %d about topic %d", g, i, i%7), nil, 0.5)
+				if i%3 == 0 {
+					s.Recall(fmt.Sprintf("topic %d", i%7), 5)
+				}
+				if i%10 == 0 {
+					s.Forget(m.ID)
+				}
+			}
+		}(g)
+	}
+	wg.Wait()
+	if got := s.Stats().Memories; got <= 0 {
+		t.Fatalf("expected some memories to survive, got %d", got)
+	}
+}
+
+func TestSaveConcurrent(t *testing.T) {
+	s := NewStore()
+	for i := 0; i < 50; i++ {
+		s.Remember(fmt.Sprintf("fact %d", i), nil, 0.5)
+	}
+	path := filepath.Join(t.TempDir(), "mem.json")
+	var wg sync.WaitGroup
+	for g := 0; g < 4; g++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for i := 0; i < 20; i++ {
+				if err := s.Save(path); err != nil {
+					t.Error(err)
+				}
+			}
+		}()
+	}
+	wg.Wait()
+	s2 := NewStore()
+	if err := s2.Load(path); err != nil {
+		t.Fatalf("snapshot after concurrent saves is unreadable: %v", err)
+	}
 }

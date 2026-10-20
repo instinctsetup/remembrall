@@ -58,6 +58,10 @@ type HNSW struct {
 	maxLayer int
 	rnd      *rand.Rand
 	mL       float64
+	// set during Insert so selectNeighbors can measure the node being
+	// inserted; per-instance so two HNSWs never clobber each other
+	insID  uint32
+	insVec []float32
 }
 
 func NewHNSW() *HNSW {
@@ -65,13 +69,6 @@ func NewHNSW() *HNSW {
 }
 
 func dist(a, b []float32) float32 { return 1 - Dot(a, b) }
-
-// set during Insert so selectNeighbors can measure the node being inserted,
-// which is registered in the map before linking but kept explicit here.
-var (
-	currentInsertID  uint32
-	currentInsertVec []float32
-)
 
 func (h *HNSW) randomLevel() int {
 	return int(-math.Log(h.rnd.Float64()+1e-12) * h.mL)
@@ -111,7 +108,7 @@ func (h *HNSW) Insert(id uint32, vec []float32) {
 		if l == 0 {
 			mmax = hnswMmax0
 		}
-		currentInsertID, currentInsertVec = id, vec
+		h.insID, h.insVec = id, vec
 		sel := h.selectNeighbors(vec, cands, hnswM)
 		n.neighbors[l] = sel
 		for _, nb := range sel {
@@ -223,14 +220,14 @@ func (h *HNSW) selectNeighbors(target []float32, cands []candidate, m int) []uin
 			break
 		}
 		cv := h.nodes[c.id].vec
-		if c.id == currentInsertID {
-			cv = currentInsertVec
+		if c.id == h.insID {
+			cv = h.insVec
 		}
 		diverse := true
 		for _, sel := range selected {
 			sv := h.nodes[sel].vec
-			if sel == currentInsertID {
-				sv = currentInsertVec
+			if sel == h.insID {
+				sv = h.insVec
 			}
 			if dist(cv, sv) < c.dist {
 				diverse = false
