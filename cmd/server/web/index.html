@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>remembrall</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main>
+  <header>
+    <h1>🔮 remembrall</h1>
+    <p class="sub">local-first long-term memory for AI agents - hybrid vector + keyword recall, with decay and reinforcement</p>
+  </header>
+
+  <section class="cards">
+    <div class="card"><div class="num" id="c-mem">0</div><div class="lbl">MEMORIES</div></div>
+    <div class="card"><div class="num" id="c-vec">0</div><div class="lbl">INDEXED VECTORS</div></div>
+    <div class="card"><div class="num" id="c-imp">0</div><div class="lbl">AVG IMPORTANCE</div></div>
+    <div class="card"><div class="num" id="c-acc">0</div><div class="lbl">TOTAL RECALLS</div></div>
+    <div class="card"><div class="num" id="c-lat">-</div><div class="lbl">LAST QUERY MS</div></div>
+    <div class="card actions">
+      <button id="btn-seed" class="primary">▶ Seed 200 memories</button>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>REMEMBER</h2>
+    <div class="row">
+      <input id="r-text" placeholder="something worth remembering...">
+      <input id="r-imp" type="number" min="0" max="1" step="0.1" value="0.5" title="importance 0..1">
+      <button id="btn-remember" class="primary">Remember</button>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>RECALL (hybrid: vector similarity + BM25, weighted by decay and importance)</h2>
+    <div class="row">
+      <input id="q-text" placeholder="ask the memory...">
+      <button id="btn-recall" class="primary">Recall</button>
+    </div>
+    <div id="hits"></div>
+  </section>
+
+  <section class="panel">
+    <h2>MEMORY FEED (newest first)</h2>
+    <div id="feed"></div>
+  </section>
+</main>
+<script src="app.js"></script>
+</body>
+</html>
