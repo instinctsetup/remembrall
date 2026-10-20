@@ -5,8 +5,8 @@ commitments persist across sessions, retrievable in milliseconds, with
 human-like forgetting and reinforcement. No vector DB, no embedding API, no
 cloud - one Go binary, one JSON file.
 
-**Demo video:** see `demo/remembrall-demo.mp4` (Drive mirror linked below)
-**Report:** `docs/report/REPORT.pdf`
+**Demo video:** https://drive.google.com/file/d/1OABLsS5pZj7M8zM547XRXVM6FcdmK0XO/view (also in `demo/remembrall-demo.mp4`)
+**Report (PDF):** https://drive.google.com/file/d/1d217v-rxk6GQSLFQRZpBqtLApZ28az89/view (also in `docs/report/REPORT.pdf`)
 
 ![dashboard](docs/dashboard.png)
 
