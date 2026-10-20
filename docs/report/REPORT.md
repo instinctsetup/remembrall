@@ -84,7 +84,13 @@ x 50x50 topic pairs - duplicates rare), linux/amd64, Go 1.26.6.
 Reproduce: `go run ./cmd/bench` (writes `benchmarks.json`), `go run ./cmd/iso`
 for the index-isolation curve.
 
-NUMBERS_PLACEHOLDER
+| Metric | Value |
+|---|---|
+| Insert (embed + HNSW + BM25), 50k memories | 332 memories/s (150.4s total) |
+| Hybrid recall latency, p50 / p99 | 4.3 ms / 12.0 ms (500 queries) |
+| HNSW recall@10 vs exact brute force | 0.880 (50k embedded corpus, ef=200, 30 queries) |
+| Isolation: adversarial 384-dim gaussian, n=30k | recall@10 0.775 at ef=100, 0.895 at ef=400 |
+| Unit test: structured vectors, n=3k | recall@10 = 1.000 |
 
 ## What limits recall: an honest account
 

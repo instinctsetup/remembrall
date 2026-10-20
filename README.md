@@ -29,15 +29,17 @@ cloud - one Go binary, one JSON file.
 
 ## Measured performance
 
-Single goroutine, sequential calls, in-process API, fixed seed, 100k synthetic
+Single goroutine, sequential calls, in-process API, fixed seed, 50k synthetic
 agent memories, linux/amd64, Go 1.26.6. Reproduce with `go run ./cmd/bench`.
 
 | Metric | Value |
 |---|---|
-| Insert (embed + HNSW + BM25) | **~1,200 memories/s** |
-| Hybrid recall, p50 | **3.1 ms** |
-| Hybrid recall, p99 | **5.4 ms** |
-| HNSW recall@10 vs exact brute force | see `benchmarks.json` (measured at 100k) |
+| Insert (embed + HNSW + BM25) | **332 memories/s** |
+| Hybrid recall, p50 | **4.3 ms** |
+| Hybrid recall, p99 | **12.0 ms** |
+| HNSW recall@10 vs exact brute force | **0.880** (50k embedded corpus, ef=200) |
+| recall@10, adversarial gaussian n=30k | 0.775 (ef=100) / 0.895 (ef=400) |
+| recall@10, structured vectors n=3k | 1.000 (unit test) |
 
 ## Why memory is not RAG
 
